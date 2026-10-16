@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | JobTrack{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <div>
+        <p class="eyebrow">YOUR CAREER WORKSPACE</p>
+        <h1>Job Application Dashboard</h1>
+        <p class="muted">
+            Track your applications, prepare for interviews, and monitor your progress.
+        </p>
+    </div>
+
+    <a href="{{ url_for('applications') }}" class="btn primary">
+        + Add Application
+    </a>
+</section>
+
+<section class="stats-grid">
+
+    <article class="stat-card">
+        <div class="stat-icon blue">▤</div>
+        <p>Total Applications</p>
+        <h2>{{ stats.total }}</h2>
+        <span class="muted">All tracked applications</span>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-icon purple">◷</div>
+        <p>Interviews</p>
+        <h2>{{ stats.status_counts['Interview'] }}</h2>
+        <span class="muted">Applications at interview stage</span>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-icon green">✓</div>
+        <p>Offers</p>
+        <h2>{{ stats.status_counts['Offered'] }}</h2>
+        <span class="muted">Offers received</span>
+    </article>
+
+    <article class="stat-card">
+        <div class="stat-icon orange">▣</div>
+        <p>Upcoming Interviews</p>
+        <h2>{{ stats.upcoming_interviews }}</h2>
+        <span class="muted">From today onward</span>
+    </article>
+
+</section>
+
+<section class="content-panel">
+    <div class="panel-heading">
+        <div>
+            <h2>Application Pipeline</h2>
+            <p class="muted">See where your applications currently stand.</p>
+        </div>
+
+        <a href="{{ url_for('applications') }}" class="text-link">
+            View all →
+        </a>
+    </div>
+
+    <div class="pipeline-grid">
+        {% for status in statuses if false %}
+        {% endfor %}
+
+        <a href="{{ url_for('applications', status='Applied') }}" class="pipeline-item">
+            <span class="status-dot applied"></span>
+            <span>Applied</span>
+            <strong>{{ stats.status_counts['Applied'] }}</strong>
+        </a>
+
+        <a href="{{ url_for('applications', status='Online Assessment') }}" class="pipeline-item">
+            <span class="status-dot assessment"></span>
+            <span>Online Assessment</span>
+            <strong>{{ stats.status_counts['Online Assessment'] }}</strong>
+        </a>
+
+        <a href="{{ url_for('applications', status='Interview') }}" class="pipeline-item">
+            <span class="status-dot interview"></span>
+            <span>Interview</span>
+            <strong>{{ stats.status_counts['Interview'] }}</strong>
+        </a>
+
+        <a href="{{ url_for('applications', status='Offered') }}" class="pipeline-item">
+            <span class="status-dot offered"></span>
+            <span>Offered</span>
+            <strong>{{ stats.status_counts['Offered'] }}</strong>
+        </a>
+
+        <a href="{{ url_for('applications', status='Rejected') }}" class="pipeline-item">
+            <span class="status-dot rejected"></span>
+            <span>Rejected</span>
+            <strong>{{ stats.status_counts['Rejected'] }}</strong>
+        </a>
+    </div>
+</section>
+
+<section class="content-panel">
+    <div class="panel-heading">
+        <div>
+            <h2>Recent Applications</h2>
+            <p class="muted">Your five most recently updated records.</p>
+        </div>
+
+        <a href="{{ url_for('applications') }}" class="text-link">
+            Manage applications →
+        </a>
+    </div>
+
+    {% if applications %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Role</th>
+                    <th>Applied On</th>
+                    <th>Status</th>
+                    <th>Interview Date</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for application in applications %}
+                <tr>
+                    <td><strong>{{ application['company'] }}</strong></td>
+                    <td>{{ application['role'] }}</td>
+                    <td>{{ application['application_date'] }}</td>
+                    <td>
+                        <span class="status-badge {{ application['status']|lower|replace(' ', '-') }}">
+                            {{ application['status'] }}
+                        </span>
+                    </td>
+                    <td>
+                        {{ application['interview_date'] or '—' }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>No applications yet</h3>
+        <p>Add your first job or internship application to get started.</p>
+        <a href="{{ url_for('applications') }}" class="btn primary">
+            Add Your First Application
+        </a>
+    </div>
+    {% endif %}
+</section>
+
+{% endblock %}

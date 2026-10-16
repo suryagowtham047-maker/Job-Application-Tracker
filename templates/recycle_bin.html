@@ -1,0 +1,104 @@
+<escape>{% extends "base.html" %}
+
+{% block title %}Recycle Bin | JobTrack{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div>
+        <h1>Recycle Bin</h1>
+        <p>Deleted applications stay here for up to {{ retention_days }} days.</p>
+    </div>
+    <a href="{{ url_for('applications') }}" class="btn btn-secondary">
+        Back to Applications
+    </a>
+</section>
+
+<div class="trash-notice">
+    <span class="notice-icon">!</span>
+    <div>
+        <strong>Automatic deletion is enabled</strong>
+        <p>
+            Applications are permanently deleted after 15 days in the Recycle Bin.
+            Restore anything you want to keep before it expires.
+        </p>
+    </div>
+</div>
+
+<section class="trash-panel">
+    <div class="trash-panel-header">
+        <div>
+            <h2>Deleted applications</h2>
+            <p>{{ applications|length }} item(s) in the Recycle Bin</p>
+        </div>
+    </div>
+
+    {% if applications %}
+        <div class="table-wrapper">
+            <table class="trash-table">
+                <thead>
+                    <tr>
+                        <th>Company / Role</th>
+                        <th>Deleted on</th>
+                        <th>Time remaining</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for application in applications %}
+                    <tr>
+                        <td>
+                            <strong>{{ application.company }}</strong>
+                            <span class="trash-role">{{ application.role }}</span>
+                            {% if application.location %}
+                                <span class="trash-location">{{ application.location }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ application.deleted_at }}</td>
+                        <td>
+                            {% if application.days_remaining > 0 %}
+                                <span class="days-left">
+                                    {{ application.days_remaining }} day(s) left
+                                </span>
+                            {% else %}
+                                <span class="days-expired">Expiring</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="trash-actions">
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('restore_trashed_application', application_id=application.id) }}"
+                                >
+                                    <button type="submit" class="btn btn-restore">
+                                        Restore
+                                    </button>
+                                </form>
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('permanently_delete_trashed_application', application_id=application.id) }}"
+                                    onsubmit="return confirm('Permanently delete this application? This action cannot be undone.');"
+                                >
+                                    <button type="submit" class="btn btn-permanent-delete">
+                                        Delete forever
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="trash-empty">
+            <div class="trash-empty-icon">♻</div>
+            <h3>Your Recycle Bin is empty</h3>
+            <p>Applications you delete will appear here. You can restore them before they expire.</p>
+            <a href="{{ url_for('applications') }}" class="btn">
+                View Applications
+            </a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}</escape>

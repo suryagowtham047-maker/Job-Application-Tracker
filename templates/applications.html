@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Applications | JobTrack{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <div>
+        <p class="eyebrow">APPLICATION MANAGEMENT</p>
+        <h1>My Applications</h1>
+        <p class="muted">Keep every job and internship opportunity organized.</p>
+    </div>
+</section>
+
+<section class="content-panel">
+    <div class="panel-heading">
+        <div>
+            <h2>Add Application</h2>
+            <p class="muted">Record a new job or internship opportunity.</p>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('applications') }}" class="application-form">
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="company">Company *</label>
+                <input type="text" id="company" name="company" placeholder="e.g. Google" maxlength="150" required>
+            </div>
+
+            <div class="form-group">
+                <label for="role">Job Role *</label>
+                <input type="text" id="role" name="role" placeholder="e.g. Software Engineer Intern" maxlength="150" required>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" placeholder="e.g. Bengaluru / Remote" maxlength="150">
+            </div>
+
+            <div class="form-group">
+                <label for="job_type">Job Type *</label>
+                <select id="job_type" name="job_type" required>
+                    {% for job_type in job_types %}
+                    <option value="{{ job_type }}">{{ job_type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="application_date">Application Date *</label>
+                <input type="date" id="application_date" name="application_date" value="{{ today }}" max="{{ today }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="status">Application Status *</label>
+                <select id="status" name="status" required>
+                    {% for status in statuses %}
+                    <option value="{{ status }}">{{ status }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="interview_date">Interview Date</label>
+                <input type="date" id="interview_date" name="interview_date">
+            </div>
+
+            <div class="form-group">
+                <label for="job_url">Job Posting URL</label>
+                <input type="url" id="job_url" name="job_url" placeholder="https://example.com/job">
+            </div>
+
+            <div class="form-group full-width">
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" rows="3" maxlength="5000" placeholder="Recruiter details, preparation notes, next steps..."></textarea>
+            </div>
+
+        </div>
+
+        <button type="submit" class="btn primary">Save Application</button>
+    </form>
+</section>
+
+<section class="content-panel">
+    <div class="panel-heading">
+        <div>
+            <h2>Application Records</h2>
+            <p class="muted">{{ applications|length }} matching application(s)</p>
+        </div>
+    </div>
+
+    <form method="GET" action="{{ url_for('applications') }}" class="filter-form">
+
+        <div class="form-group">
+            <label for="search">Search</label>
+            <input type="search" id="search" name="search" value="{{ search_text }}" placeholder="Company, role, location, notes...">
+        </div>
+
+        <div class="form-group">
+            <label for="filter_status">Status</label>
+            <select id="filter_status" name="status">
+                <option value="">All statuses</option>
+                {% for status in statuses %}
+                <option value="{{ status }}" {% if selected_status == status %}selected{% endif %}>
+                    {{ status }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="filter_job_type">Job Type</label>
+            <select id="filter_job_type" name="job_type">
+                <option value="">All job types</option>
+                {% for job_type in job_types %}
+                <option value="{{ job_type }}" {% if selected_job_type == job_type %}selected{% endif %}>
+                    {{ job_type }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn primary">Apply Filters</button>
+            <a href="{{ url_for('applications') }}" class="btn secondary">Clear</a>
+        </div>
+
+    </form>
+
+    <div class="export-row">
+        <a href="{{ url_for('export_csv', search=search_text, status=selected_status, job_type=selected_job_type) }}" class="btn secondary">
+            Export Filtered Results to CSV
+        </a>
+    </div>
+
+    {% if applications %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Company / Role</th>
+                    <th>Location</th>
+                    <th>Type</th>
+                    <th>Applied On</th>
+                    <th>Status</th>
+                    <th>Interview</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for application in applications %}
+                <tr>
+                    <td>
+                        <strong>{{ application['company'] }}</strong>
+                        <div class="table-subtext">{{ application['role'] }}</div>
+
+                        {% if application['job_url'] %}
+                        <a class="small-link" href="{{ application['job_url'] }}" target="_blank" rel="noopener noreferrer">Open job posting ↗</a>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ application['location'] or '—' }}</td>
+                    <td>{{ application['job_type'] }}</td>
+                    <td>{{ application['application_date'] }}</td>
+
+                    <td>
+                        <span class="status-badge {{ application['status']|lower|replace(' ', '-') }}">
+                            {{ application['status'] }}
+                        </span>
+                    </td>
+
+                    <td>{{ application['interview_date'] or '—' }}</td>
+
+                    <td>
+                        <div class="action-buttons">
+                            <a href="{{ url_for('edit_application', application_id=application['id']) }}" class="btn secondary small-btn">Edit</a>
+
+                            <form method="POST"
+                                  action="{{ url_for('remove_application', application_id=application['id']) }}"
+                                  onsubmit="return confirm('Delete this application permanently?');">
+
+                                <button type="submit" class="btn danger small-btn">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+
+                {% if application['notes'] %}
+                <tr class="notes-row">
+                    <td colspan="7">
+                        <strong>Notes:</strong> {{ application['notes'] }}
+                    </td>
+                </tr>
+                {% endif %}
+
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+        <h3>No applications found</h3>
+        <p>Add an application above or adjust your search and filters.</p>
+    </div>
+    {% endif %}
+</section>
+
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Application | JobTrack{% endblock %}
+
+{% block content %}
+
+<section class="page-header">
+    <div>
+        <p class="eyebrow">APPLICATION MANAGEMENT</p>
+        <h1>Edit Application</h1>
+        <p class="muted">
+            Update the details or status of your application to {{ application['company'] }}.
+        </p>
+    </div>
+
+    <a href="{{ url_for('applications') }}" class="btn secondary">
+        ← Back to Applications
+    </a>
+</section>
+
+<section class="content-panel edit-panel">
+
+    <div class="panel-heading">
+        <div>
+            <h2>{{ application['company'] }}</h2>
+            <p class="muted">Application ID: #{{ application['id'] }}</p>
+        </div>
+
+        <span class="status-badge {{ application['status']|lower|replace(' ', '-') }}">
+            {{ application['status'] }}
+        </span>
+    </div>
+
+    <form method="POST"
+          action="{{ url_for('edit_application', application_id=application['id']) }}"
+          class="application-form">
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="company">Company *</label>
+                <input
+                    type="text"
+                    id="company"
+                    name="company"
+                    value="{{ application['company'] }}"
+                    maxlength="150"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="role">Job Role *</label>
+                <input
+                    type="text"
+                    id="role"
+                    name="role"
+                    value="{{ application['role'] }}"
+                    maxlength="150"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input
+                    type="text"
+                    id="location"
+                    name="location"
+                    value="{{ application['location'] }}"
+                    maxlength="150"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="job_type">Job Type *</label>
+                <select id="job_type" name="job_type" required>
+                    {% for job_type in job_types %}
+                    <option
+                        value="{{ job_type }}"
+                        {% if application['job_type'] == job_type %}selected{% endif %}
+                    >
+                        {{ job_type }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="application_date">Application Date *</label>
+                <input
+                    type="date"
+                    id="application_date"
+                    name="application_date"
+                    value="{{ application['application_date'] }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="status">Application Status *</label>
+                <select id="status" name="status" required>
+                    {% for status in statuses %}
+                    <option
+                        value="{{ status }}"
+                        {% if application['status'] == status %}selected{% endif %}
+                    >
+                        {{ status }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="interview_date">Interview Date</label>
+                <input
+                    type="date"
+                    id="interview_date"
+                    name="interview_date"
+                    value="{{ application['interview_date'] }}"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="job_url">Job Posting URL</label>
+                <input
+                    type="url"
+                    id="job_url"
+                    name="job_url"
+                    value="{{ application['job_url'] }}"
+                    placeholder="https://example.com/job"
+                >
+            </div>
+
+            <div class="form-group full-width">
+                <label for="notes">Notes</label>
+                <textarea
+                    id="notes"
+                    name="notes"
+                    rows="5"
+                    maxlength="5000"
+                    placeholder="Recruiter details, preparation notes, next steps..."
+                >{{ application['notes'] }}</textarea>
+            </div>
+
+        </div>
+
+        <div class="form-footer">
+            <button type="submit" class="btn primary">
+                Save Changes
+            </button>
+
+            <a href="{{ url_for('applications') }}" class="btn secondary">
+                Cancel
+            </a>
+        </div>
+
+    </form>
+
+    <div class="record-metadata">
+        <p><strong>Created:</strong> {{ application['created_at'] }}</p>
+        <p><strong>Last Updated:</strong> {{ application['updated_at'] }}</p>
+    </div>
+
+</section>
+
+{% endblock %}
